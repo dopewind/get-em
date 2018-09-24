@@ -5,7 +5,6 @@ import requests
 import shutil
 
 def main(user, file, lichess_api_key):
-    print(lichess_api_key)
     print("Downloading %s's games to %s:" % (user, file))
     try:
         os.remove(file)
@@ -14,7 +13,12 @@ def main(user, file, lichess_api_key):
     for archive in requests.get('https://api.chess.com/pub/player/%s/games/archives' % user).json()['archives']:
         download_archive(archive, file)
     print("about to make lichess request")
-    r = requests.get('https://lichess.org/api/games/user/%s' % user, headers={'Authorization': 'Bearer ' + lichess_api_key}, stream=True)
+    if lichess_api_key is not None:
+        print(lichess_api_key)
+        r = requests.get('https://lichess.org/api/games/user/%s' % user, headers={'Authorization': 'Bearer ' + lichess_api_key[0]}, stream=True)
+    elif lichess_api_key is None:
+        print(lichess_api_key)
+        r = requests.get('https://lichess.org/api/games/user/%s' % user, stream=True)
     print(r.text)
     with open(file, 'a', encoding = 'utf-8') as output:
         print(r.text, file=output)
@@ -42,4 +46,4 @@ if __name__ == '__main__':
     parser.add_argument('file', metavar='PATH', help='which file (can include directory) to create the PGN files', default="./chessGames.pgn", nargs='?')
     parser.add_argument('--lichess_api_key', metavar='API_KEY', help =  'the api key for lichess', default=None, nargs = 1)
     args = parser.parse_args()
-    main(args.user, args.file, args.lichess_api_key[0])
+    main(args.user, args.file, args.lichess_api_key)
