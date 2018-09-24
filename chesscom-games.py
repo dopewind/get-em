@@ -3,21 +3,21 @@ from datetime import date
 import os.path
 import requests
 
-def main(user, where):
-    print("Downloading %s's games to %s:" % (user, where))
+def main(user, file):
+    print("Downloading %s's games to %s:" % (user, file))
+    try:
+        os.remove(file)
+    except OSError:
+        pass
     for archive in get('https://api.chess.com/pub/player/%s/games/archives' % user)['archives']:
-        download_archive(archive, where)
+        download_archive(archive, file)
 
-def download_archive(url, where):
+def download_archive(url, file):
     games = get(url)['games']
-    d = date.fromtimestamp(games[0]['end_time'])
-    y = d.year
-    m = d.month
-    filename = os.path.join(where, "%d-%02d.pgn" % (y, m))
-    print('Starting work on %s...' % filename)
+    print('Starting work on %s...' % file)
     # XXX: If a file with this name already exists, we'll blow away the old
     # one. Possibly not ideal.
-    with open(filename, 'w', encoding='utf-8') as output:
+    with open(file, 'a', encoding='utf-8') as output:
         for game in games:
             print(game['pgn'], file=output)
             print('', file=output)
@@ -29,7 +29,7 @@ if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(description="Download a user's games from chess.com")
     parser.add_argument('user', metavar='USER', help='The user whose games we want')
-    parser.add_argument('where', metavar='PATH', help='Where to create the PGN files',
-            default=".", nargs='?')
+    parser.add_argument('file', metavar='PATH', help='which file (can include directory) to create the PGN files',
+            default="./chessGames.pgn", nargs='?')
     args = parser.parse_args()
-    main(args.user, args.where)
+    main(args.user, args.file)
