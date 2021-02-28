@@ -1,4 +1,3 @@
-import shutil
 import requests
 from codecs import open
 from datetime import date
@@ -15,39 +14,43 @@ def main(user, luser, file, lichess_api_key, ccom, lorg):
     if ccom == 1:
         for archive in requests.get('https://api.chess.com/pub/player/%s/games/archives' % user).json()['archives']:
             download_archive(archive, file)
-
     else:
-        print("Skipping chess.com")
+        print("""Skipping chess.com!""")
 
     if lorg == 1:
-        print("about to make lichess request")
         if lichess_api_key is not None:
-            print(lichess_api_key)
             r = requests.get('https://lichess.org/api/games/user/%s' % luser,
                              headers={'Authorization': 'Bearer ' + lichess_api_key[0]}, stream=True)
 
         elif lichess_api_key is None:
-            print(lichess_api_key)
             r = requests.get('https://lichess.org/api/games/user/%s' %
                              luser, stream=True)
-        print(r.text)
+        # print(r.text)
         with open(file, 'a', encoding='utf-8') as output:
             print(r.text, file=output)
             print('', file=output)
 
     else:
-        print("Skipping lichess.org")
+        print("""Skipping lichess.org!""")
 
 
 def download_archive(url, file):
+    missing = 0
     games = get(url)['games']
-    print('Starting work on %s...' % file)
+    print('Working on %s...' % file)
     # XXX: If a file with this name already exists, we'll blow away the old
     # one. Possibly not ideal.
     with open(file, 'a', encoding='utf-8') as output:
         for game in games:
-            print(game['pgn'], file=output)
-            print('', file=output)
+            try:
+                if game['pgn']:
+                    print(game['pgn'], file=output)
+                    print('', file=output)
+            except:
+                # print("Some games might be missing, please cross check")
+                missing += 1
+    if missing != 0:
+        print(missing, "games are missing, I am working on how to fix this")
 
 
 def get(url, headers=None):
@@ -80,11 +83,11 @@ if __name__ == '__main__':
             lorg = 0
     except:
         print("idk, some error")
-    if args.lichess_api_key == None:
+
+    if args.lichess_api_key == None and lorg == 1:
         try:
             lichess_api_key = environ['lichess_api_key']
         except KeyError:
             print(
                 """Either input key as argument or save it as an env variable ("lichess_api_key")""")
-    print(args.user, args.luser, args.file, args.lichess_api_key, ccom, lorg)
     main(args.user, args.luser, args.file, args.lichess_api_key, ccom, lorg)
