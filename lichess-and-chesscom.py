@@ -68,7 +68,7 @@ if __name__ == '__main__':
     try:
         args = parser.parse_args()
         print("No errors passing arguments")
-        if args.user != None:
+        if args.user != None and args.user != "":
             ccom = 1
         else:
             ccom = 0
@@ -78,4 +78,5 @@ if __name__ == '__main__':
             lorg = 0
     except:
         print("idk, some error")
+    print(args.user, args.luser, args.file, args.lichess_api_key, ccom, lorg)
     main(args.user, args.luser, args.file, args.lichess_api_key, ccom, lorg)
