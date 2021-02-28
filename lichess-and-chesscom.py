@@ -5,8 +5,6 @@ from datetime import date
 import os.path
 from os import environ
 
-lichess_api_key = environ['lichess_api_key']
-
 
 def main(user, luser, file, lichess_api_key, ccom, lorg):
     try:
@@ -78,5 +76,11 @@ if __name__ == '__main__':
             lorg = 0
     except:
         print("idk, some error")
+    if args.lichess_api_key == None:
+        try:
+            lichess_api_key = environ['lichess_api_key']
+        except KeyError:
+            print(
+                """Either input key as argument or save it as an env variable ("lichess_api_key")""")
     print(args.user, args.luser, args.file, args.lichess_api_key, ccom, lorg)
     main(args.user, args.luser, args.file, args.lichess_api_key, ccom, lorg)
