@@ -11,17 +11,21 @@ def main(user, luser, file, lichess_api_key, ccom, lorg):
         os.remove(file)
     except OSError:
         pass
+
     if ccom == 1:
         for archive in requests.get('https://api.chess.com/pub/player/%s/games/archives' % user).json()['archives']:
             download_archive(archive, file)
+
     else:
         print("Skipping chess.com")
+
     if lorg == 1:
         print("about to make lichess request")
         if lichess_api_key is not None:
             print(lichess_api_key)
             r = requests.get('https://lichess.org/api/games/user/%s' % luser,
                              headers={'Authorization': 'Bearer ' + lichess_api_key[0]}, stream=True)
+
         elif lichess_api_key is None:
             print(lichess_api_key)
             r = requests.get('https://lichess.org/api/games/user/%s' %
